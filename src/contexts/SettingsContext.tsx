@@ -3,7 +3,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 
 interface Settings {
-  eyeCount: number;
   eyeScale: number;
   damping: number;
   stiffness: number;
@@ -16,7 +15,6 @@ interface SettingsContextType {
 }
 
 const defaultSettings: Settings = {
-  eyeCount: 35,
   eyeScale: 85,
   damping: 15,
   stiffness: 150,

@@ -79,20 +79,6 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
                   <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Eye Count: {settings.eyeCount}
-                      </label>
-                      <input
-                        type="range"
-                        min="1"
-                        max="100"
-                        value={settings.eyeCount}
-                        onChange={(e) => updateSettings({ eyeCount: parseInt(e.target.value) })}
-                        className="w-full accent-blue-500 bg-[#374151] h-2 rounded-lg appearance-none cursor-pointer"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
                         Eye Scale: {settings.eyeScale}%
                       </label>
                       <input
