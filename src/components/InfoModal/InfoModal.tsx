@@ -53,7 +53,7 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-[90%] max-w-md bg-[#1F2937] rounded-2xl shadow-2xl z-50 text-gray-100 
+              className="w-[95%] max-w-lg bg-[#1F2937] rounded-2xl shadow-2xl z-50 text-gray-100 
                        overflow-hidden flex flex-col max-h-[80vh]"
             >
               {/* Tabs */}
@@ -85,10 +85,9 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
               <div className="flex-1 overflow-y-auto px-6 py-4">
                 {activeTab === 'info' ? (
                   <>
-                    <h2 className="text-2xl font-bold mb-4 text-white">Eyes On U 👀</h2>
+                    <h2 className="text-2xl font-bold mb-4 text-white">The Universal Feeling of Being Watched: A Reflection of Our Existence</h2>
                     <p className="text-gray-300 mb-4">
-                      Ever felt like you&apos;re being watched? This piece explores that universal feeling we all know too well.
-                      Sometimes it&apos;s the weight of expectations, other times it&apos;s the comfort of being seen and acknowledged.
+                      In a world where we&apos;re constantly being observed, judged, and influenced, the feeling of being watched is a universal phenomenon that transcends cultures and boundaries. It&apos;s a sensation that can evoke feelings of comfort, anxiety, or even paranoia. This piece is an exploration of that feeling, a reflection of our existence in a world where we&apos;re always being seen.
                     </p>
                     <p className="text-gray-300 mb-6">
                       As you move through this space, hundreds of eyes follow your every move – just like the countless 
@@ -97,6 +96,7 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
                     </p>
                     <div className="text-sm text-gray-400">
                       <p className="mb-2">Created by <a href="https://karanjanthe.me" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Karan Janthe</a></p>
+                      <p className="mb-2">GitHub: <a href="https://github.com/KMJ-007/eyesonu" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">eyesonu</a></p>
                     </div>
                   </>
                 ) : (
