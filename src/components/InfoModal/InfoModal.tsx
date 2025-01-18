@@ -2,6 +2,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useState, useEffect } from 'react';
 import { useMousePosition } from '@/hooks/useMousePosition';
+import { useDeviceOrientation } from '@/hooks/useDeviceOrientation';
+
+interface WindowWithOrientation extends Window {
+  DeviceOrientationEvent?: {
+    requestPermission?: () => Promise<PermissionState>;
+  };
+}
 
 interface InfoModalProps {
   isOpen: boolean;
@@ -12,6 +19,7 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
   const { settings, updateSettings } = useSettings();
   const [activeTab, setActiveTab] = useState<'info' | 'settings'>('info');
   const mousePosition = useMousePosition();
+  const { orientation, error } = useDeviceOrientation();
   const [calculations, setCalculations] = useState({ dx: 0, dy: 0, angle: 0, distance: 0 });
 
   useEffect(() => {
@@ -96,6 +104,75 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
                     <h2 className="text-2xl font-bold text-white">Settings</h2>
                     
                     <div className="space-y-6">
+                      {/* Gyroscope Status */}
+                      <div className="bg-[#374151] p-4 rounded-lg space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-sm font-medium text-gray-300">Gyroscope</h3>
+                          <span className={`text-xs px-2 py-1 rounded ${orientation ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                            {orientation ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
+                        {error && (
+                          <p className="text-xs text-red-400">{error.message}</p>
+                        )}
+                        {/* Debug Info */}
+                        <div className="text-xs text-gray-400 space-y-1 border-t border-gray-600 mt-2 pt-2">
+                          <div>
+                            <span>Device Orientation Support: </span>
+                            <span className="text-white">{('DeviceOrientationEvent' in window) ? 'Yes' : 'No'}</span>
+                          </div>
+                          <div>
+                            <span>Has Permission API: </span>
+                            <span className="text-white">
+                              {typeof (window as WindowWithOrientation).DeviceOrientationEvent?.requestPermission === 'function' ? 'Yes' : 'No'}
+                            </span>
+                          </div>
+                          <div>
+                            <span>Is Touch Device: </span>
+                            <span className="text-white">{'ontouchstart' in window ? 'Yes' : 'No'}</span>
+                          </div>
+                        </div>
+                        {orientation && (
+                          <div className="grid grid-cols-3 gap-2 text-sm">
+                            <div>
+                              <span className="text-gray-400">α (alpha):</span>
+                              <span className="ml-2 text-white">{orientation.alpha?.toFixed(1)}°</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">β (beta):</span>
+                              <span className="ml-2 text-white">{orientation.beta?.toFixed(1)}°</span>
+                            </div>
+                            <div>
+                              <span className="text-gray-400">γ (gamma):</span>
+                              <span className="ml-2 text-white">{orientation.gamma?.toFixed(1)}°</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Mouse/Gyro Position Debug */}
+                      <div className="bg-[#374151] p-4 rounded-lg space-y-2">
+                        <h3 className="text-sm font-medium text-gray-300">Position Debug</h3>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <span className="text-gray-400">Mouse X:</span>
+                            <span className="ml-2 text-white">{Math.round(mousePosition.x)}px</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400">Mouse Y:</span>
+                            <span className="ml-2 text-white">{Math.round(mousePosition.y)}px</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400">Window Width:</span>
+                            <span className="ml-2 text-white">{window.innerWidth}px</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400">Window Height:</span>
+                            <span className="ml-2 text-white">{window.innerHeight}px</span>
+                          </div>
+                        </div>
+                      </div>
+
                       {/* Eye tracking calculations */}
                       <div className="bg-[#374151] p-4 rounded-lg space-y-2">
                         <h3 className="text-sm font-medium text-gray-300">Eye Tracking Calculations</h3>

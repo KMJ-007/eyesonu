@@ -1,8 +1,6 @@
-# Eyes on U
+# The Universal Feeling of Being Watched: A Reflection of Our Existence
 
-A fun interactive web app where multiple eyes follow your cursor around the screen!
-
-## How It Works
+In a world where we're constantly being observed, judged, and influenced, the feeling of being watched is a universal phenomenon that transcends cultures and boundaries. It's a sensation that can evoke feelings of comfort, anxiety, or even paranoia. This project is an exploration of that feeling, a reflection of our existence in a world where we're always being seen.
 
 The eye-tracking effect works like a simplified version of real eye movement. Here's how:
 
@@ -32,7 +30,7 @@ devnotes:
 
 this thing needs to be responsive
 
-domain: eyesonyou.fun
+domain: eyesonyou.me
 
 
 don't forget to update the favicon icon
@@ -48,7 +46,7 @@ ideas:
 
 this thing needs to be responsive
 
-domain: eyesonyou.fun
+domain: eyesonyou.me
 
 
 don't forget to update the favicon icon
