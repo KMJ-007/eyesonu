@@ -19,7 +19,11 @@ export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [totalEyes, setTotalEyes] = useState(INITIAL_EYES);
   const { orientation } = useDeviceOrientation();
-  const isGyroAvailable = 'ontouchstart' in window;
+  const [isGyroAvailable, setIsGyroAvailable] = useState(false);
+
+  useEffect(() => {
+    setIsGyroAvailable('ontouchstart' in window);
+  }, []);
 
   const handleScroll = useCallback(() => {
     const container = containerRef.current;
