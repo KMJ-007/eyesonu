@@ -6,18 +6,18 @@ import { SettingsProvider } from '@/contexts/SettingsContext'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://eyesonyou.me'),
+  metadataBase: new URL('https://eyesonu.vercel.app'),
   title: 'Eyes On U',
   description: 'The feeling of being watched.',
   keywords: ['eye tracking', 'interactive art', 'digital art', 'motion tracking', 'gyroscope', 'web art', 'creative coding'],
   openGraph: {
     title: 'Eyes On U',
     description: 'The feeling of being watched.',
-    url: 'https://eyesonyou.me',
+    url: 'https://eyesonu.vercel.app',
     siteName: 'Eyes On U',
     images: [
       {
-        url: '/ogimage.jpeg',
+        url: 'https://eyesonu.vercel.app/ogimage.jpeg',
         width: 1200,
         height: 630,
         alt: 'Eyes On U - Interactive Art Experience'
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Eyes On U',
     description: 'The feeling of being watched.',
-    images: ['/ogimage.jpeg'],
+    images: ['https://eyesonu.vercel.app/ogimage.jpeg'],
     creator: '@karanjanthe'
   },
   robots: {
