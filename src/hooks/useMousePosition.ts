@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
-import { useSpring } from 'framer-motion';
 
 interface MousePosition {
   x: number;
   y: number;
 }
 
-export function useMousePosition(springConfig = { damping: 15, stiffness: 150 }) {
-  const [mousePosition, setMousePosition] = useState<MousePosition>({ x: 0, y: 0 });
-  
-  const mouseX = useSpring(mousePosition.x, springConfig);
-  const mouseY = useSpring(mousePosition.y, springConfig);
+export function useMousePosition() {
+  const [mousePosition, setMousePosition] = useState<MousePosition>({ 
+    x: typeof window !== 'undefined' ? window.innerWidth / 2 : 0,
+    y: typeof window !== 'undefined' ? window.innerHeight / 2 : 0
+  });
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -29,14 +28,14 @@ export function useMousePosition(springConfig = { damping: 15, stiffness: 150 })
       }
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleTouchMove);
-    
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('touchmove', handleTouchMove);
     };
   }, []);
 
-  return { mouseX, mouseY };
+  return mousePosition;
 } 

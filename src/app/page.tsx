@@ -6,24 +6,18 @@ import { useMousePosition } from '@/hooks/useMousePosition';
 import { useWindowSize } from '@/hooks/useWindowSize';
 import { getGridConfig } from '@/utils/gridConfig';
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useSettings } from '@/contexts/SettingsContext';
 
-const INITIAL_EYES = 500; // Start with many more eyes
-const EYES_INCREMENT = 200; // Add many more eyes each time
-const LOAD_THRESHOLD = 0.3; // Load earlier at 30% from bottom
+const INITIAL_EYES = 500;
+const EYES_INCREMENT = 200;
+const LOAD_THRESHOLD = 0.3;
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { settings } = useSettings();
-  const { mouseX, mouseY } = useMousePosition({ 
-    damping: settings.damping, 
-    stiffness: settings.stiffness 
-  });
+  const mousePosition = useMousePosition();
   const windowSize = useWindowSize();
   const containerRef = useRef<HTMLDivElement>(null);
   const [totalEyes, setTotalEyes] = useState(INITIAL_EYES);
 
-  // More aggressive scroll handler
   const handleScroll = useCallback(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -32,25 +26,19 @@ export default function Home() {
     const scrollPercentage = (scrollTop + clientHeight) / scrollHeight;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
 
-    // Add more eyes if we're either:
-    // 1. Past the threshold percentage, or
-    // 2. Within 1000px of the bottom
     if (scrollPercentage > (1 - LOAD_THRESHOLD) || distanceFromBottom < 1000) {
       setTotalEyes(prev => prev + EYES_INCREMENT);
     }
   }, []);
 
-  // Set up scroll listener with more frequent checks
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
-    // Check scroll position every 100ms regardless of scroll event
     const interval = setInterval(() => {
       handleScroll();
     }, 100);
 
-    // Also check on scroll for immediate response
     const scrollListener = () => {
       handleScroll();
     };
@@ -84,17 +72,13 @@ export default function Home() {
           return (
             <Eye 
               key={eyeId}
-              mouseX={mouseX} 
-              mouseY={mouseY}
-              isMobile={windowSize.isMobile}
-              scale={settings.eyeScale}
-              maxMoveScale={settings.maxMoveScale}
+              mouseX={mousePosition.x} 
+              mouseY={mousePosition.y}
             />
           );
         })}
       </div>
 
-      {/* Floating Info Button */}
       <button
         type="button"
         onClick={() => setIsModalOpen(true)}
