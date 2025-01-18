@@ -30,23 +30,39 @@ export function useMousePosition() {
       const { beta, gamma } = orientation;
       if (beta === null || gamma === null) return;
 
-      // Constrain the range of beta and gamma to [-90,90]
-      const constrainedBeta = Math.max(-90, Math.min(90, beta));
-      const constrainedGamma = Math.max(-90, Math.min(90, gamma));
+      // Natural holding angle is around 60 degrees tilted back
+      const NATURAL_TILT = 60;
+      
+      // Adjust beta relative to natural holding position
+      const adjustedBeta = beta - NATURAL_TILT;
 
-      // Map the orientation values to cursor coordinates
-      // Using a more precise calculation based on the reference
-      const x = ((constrainedGamma + 90) / 180) * window.innerWidth;
-      const y = ((constrainedBeta + 90) / 180) * window.innerHeight;
+      // Use wider range for more responsive movement
+      const constrainedBeta = Math.max(-25, Math.min(25, adjustedBeta));
+      const constrainedGamma = Math.max(-25, Math.min(25, gamma));
 
-      console.log('Gyro Debug:', { 
-        beta, 
-        gamma, 
-        constrained: { beta: constrainedBeta, gamma: constrainedGamma },
-        position: { x, y }
-      });
+      // Direct linear mapping with inversion
+      const normalizedGamma = -(constrainedGamma / 25);
+      const normalizedBeta = -(constrainedBeta / 25);
 
-      setMousePosition({ x, y });
+      // Tiny deadzone just to prevent jitter
+      const applyTinyDeadzone = (value: number) => Math.abs(value) < 0.02 ? 0 : value;
+
+      const gammaDead = applyTinyDeadzone(normalizedGamma);
+      const betaDead = applyTinyDeadzone(normalizedBeta);
+
+      // Direct linear response for maximum responsiveness
+      const sensitivity = 1.2;
+
+      // Almost no center bias for maximum range of movement
+      const centerBias = 0.1;
+      const x = window.innerWidth / 2 + (gammaDead * window.innerWidth * sensitivity * (1 - centerBias));
+      const y = window.innerHeight / 2 + (betaDead * window.innerHeight * sensitivity * (1 - centerBias));
+
+      // Ensure position stays within screen bounds
+      const boundedX = Math.max(0, Math.min(window.innerWidth, x));
+      const boundedY = Math.max(0, Math.min(window.innerHeight, y));
+
+      setMousePosition({ x: boundedX, y: boundedY });
     }
   }, [isUsingGyro, orientation]);
 

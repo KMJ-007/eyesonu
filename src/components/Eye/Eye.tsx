@@ -9,7 +9,7 @@ interface EyeProps {
 export function Eye({ mouseX, mouseY }: EyeProps) {
   const eyeRef = useRef<HTMLDivElement>(null);
   const pupilRef = useRef<HTMLDivElement>(null);
-  const { orientation, motion } = useDeviceOrientation();
+  const { orientation } = useDeviceOrientation();
 
   useEffect(() => {
     const eye = eyeRef.current;
@@ -20,45 +20,23 @@ export function Eye({ mouseX, mouseY }: EyeProps) {
     const eyeCenterX = rect.left + rect.width / 2;
     const eyeCenterY = rect.top + rect.height / 2;
 
-    let dx = mouseX - eyeCenterX;
-    let dy = mouseY - eyeCenterY;
-
-    // Use device orientation if available
-    if (orientation) {
-      // Convert orientation angles to movement
-      const beta = orientation.beta ?? 0; // Front/back tilt [-180, 180]
-      const gamma = orientation.gamma ?? 0; // Left/right tilt [-90, 90]
-      
-      // Scale the tilt angles to pixel movement
-      // We use gamma for x movement and beta for y movement
-      const tiltScale = rect.width * 0.15; // Adjust this value to control sensitivity
-      dx = (gamma / 90) * tiltScale;
-      dy = (beta / 180) * tiltScale;
-    }
-
-    // Use device motion if available for more responsive movement
-    if (motion?.accelerationIncludingGravity) {
-      const { x, y } = motion.accelerationIncludingGravity;
-      if (x !== null && y !== null) {
-        // Scale acceleration to pixel movement
-        const accelScale = rect.width * 0.05; // Adjust this value to control sensitivity
-        dx -= x * accelScale;
-        dy += y * accelScale;
-      }
-    }
-
+    // Calculate movement based on mouse/touch or gyro
+    const dx = mouseX - eyeCenterX;
+    const dy = mouseY - eyeCenterY;
     const angle = Math.atan2(dy, dx);
-    const maxRadius = rect.width * 0.2;
+    
+    // Increase movement range for gyro
+    const maxRadius = rect.width * (orientation ? 0.4 : 0.25); // More range for gyro
     const distance = Math.min(Math.hypot(dx, dy) * 0.15, maxRadius);
 
     // Calculate new position
     const x = Math.cos(angle) * distance;
     const y = Math.sin(angle) * distance;
 
-    // Apply the transform from the center with smooth transition
+    // Apply the transform with faster response for gyro
     pupil.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
-    pupil.style.transition = 'transform 0.1s ease-out';
-  }, [mouseX, mouseY, orientation, motion]);
+    pupil.style.transition = orientation ? 'transform 0.05s ease-out' : 'transform 0.1s ease-out';
+  }, [mouseX, mouseY, orientation]);
 
   return (
     <div ref={eyeRef} className="relative w-full pt-[100%]">
