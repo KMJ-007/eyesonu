@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as framerMotion, AnimatePresence } from 'framer-motion';
 import { useSettings } from '@/contexts/SettingsContext';
 import { useState, useEffect } from 'react';
 import { useMousePosition } from '@/hooks/useMousePosition';
@@ -8,6 +8,9 @@ interface WindowWithOrientation extends Window {
   DeviceOrientationEvent?: {
     requestPermission?: () => Promise<PermissionState>;
   };
+  DeviceMotionEvent?: {
+    requestPermission?: () => Promise<PermissionState>;
+  };
 }
 
 interface InfoModalProps {
@@ -15,12 +18,39 @@ interface InfoModalProps {
   onClose: () => void;
 }
 
+// Add interface for webkit compass properties
+interface DeviceOrientationEventWithWebkit extends DeviceOrientationEvent {
+  webkitCompassHeading?: number;
+  webkitCompassAccuracy?: number;
+}
+
 export function InfoModal({ isOpen, onClose }: InfoModalProps) {
   const { settings, updateSettings } = useSettings();
   const [activeTab, setActiveTab] = useState<'info' | 'settings'>('info');
   const mousePosition = useMousePosition();
-  const { orientation, error } = useDeviceOrientation();
+  const { orientation, motion, error } = useDeviceOrientation();
   const [calculations, setCalculations] = useState({ dx: 0, dy: 0, angle: 0, distance: 0 });
+  const [rawEvents, setRawEvents] = useState<{
+    orientation: DeviceOrientationEvent | null;
+    motion: DeviceMotionEvent | null;
+  }>({ orientation: null, motion: null });
+
+  useEffect(() => {
+    const handleOrientation = (e: DeviceOrientationEvent) => {
+      setRawEvents(prev => ({ ...prev, orientation: e }));
+    };
+    const handleMotion = (e: DeviceMotionEvent) => {
+      setRawEvents(prev => ({ ...prev, motion: e }));
+    };
+
+    window.addEventListener('deviceorientation', handleOrientation);
+    window.addEventListener('devicemotion', handleMotion);
+
+    return () => {
+      window.removeEventListener('deviceorientation', handleOrientation);
+      window.removeEventListener('devicemotion', handleMotion);
+    };
+  }, []);
 
   useEffect(() => {
     // Calculate relative to center of viewport
@@ -41,14 +71,14 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
     <AnimatePresence>
       {isOpen && (
         <>
-          <motion.div
+          <framerMotion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center"
           >
-            <motion.div
+            <framerMotion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -107,9 +137,9 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
                       {/* Gyroscope Status */}
                       <div className="bg-[#374151] p-4 rounded-lg space-y-2">
                         <div className="flex items-center justify-between">
-                          <h3 className="text-sm font-medium text-gray-300">Gyroscope</h3>
-                          <span className={`text-xs px-2 py-1 rounded ${orientation ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
-                            {orientation ? 'Active' : 'Inactive'}
+                          <h3 className="text-sm font-medium text-gray-300">Device Sensors</h3>
+                          <span className={`text-xs px-2 py-1 rounded ${orientation || motion ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                            {orientation || motion ? 'Active' : 'Inactive'}
                           </span>
                         </div>
                         {error && (
@@ -122,9 +152,14 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
                             <span className="text-white">{('DeviceOrientationEvent' in window) ? 'Yes' : 'No'}</span>
                           </div>
                           <div>
+                            <span>Device Motion Support: </span>
+                            <span className="text-white">{('DeviceMotionEvent' in window) ? 'Yes' : 'No'}</span>
+                          </div>
+                          <div>
                             <span>Has Permission API: </span>
                             <span className="text-white">
-                              {typeof (window as WindowWithOrientation).DeviceOrientationEvent?.requestPermission === 'function' ? 'Yes' : 'No'}
+                              {typeof (window as WindowWithOrientation).DeviceOrientationEvent?.requestPermission === 'function' || 
+                               typeof (window as WindowWithOrientation).DeviceMotionEvent?.requestPermission === 'function' ? 'Yes' : 'No'}
                             </span>
                           </div>
                           <div>
@@ -132,22 +167,175 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
                             <span className="text-white">{'ontouchstart' in window ? 'Yes' : 'No'}</span>
                           </div>
                         </div>
+
+                        {/* Device Orientation */}
                         {orientation && (
-                          <div className="grid grid-cols-3 gap-2 text-sm">
-                            <div>
-                              <span className="text-gray-400">α (alpha):</span>
-                              <span className="ml-2 text-white">{orientation.alpha?.toFixed(1)}°</span>
-                            </div>
-                            <div>
-                              <span className="text-gray-400">β (beta):</span>
-                              <span className="ml-2 text-white">{orientation.beta?.toFixed(1)}°</span>
-                            </div>
-                            <div>
-                              <span className="text-gray-400">γ (gamma):</span>
-                              <span className="ml-2 text-white">{orientation.gamma?.toFixed(1)}°</span>
+                          <div className="space-y-2 border-t border-gray-600 mt-2 pt-2">
+                            <h4 className="text-sm font-medium text-gray-300">Device Orientation</h4>
+                            <div className="grid grid-cols-3 gap-2 text-sm">
+                              <div>
+                                <span className="text-gray-400">α (alpha):</span>
+                                <span className="ml-2 text-white">{orientation.alpha?.toFixed(1)}°</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-400">β (beta):</span>
+                                <span className="ml-2 text-white">{orientation.beta?.toFixed(1)}°</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-400">γ (gamma):</span>
+                                <span className="ml-2 text-white">{orientation.gamma?.toFixed(1)}°</span>
+                              </div>
                             </div>
                           </div>
                         )}
+
+                        {/* Device Motion */}
+                        {motion && (
+                          <div className="space-y-2 border-t border-gray-600 mt-2 pt-2">
+                            <h4 className="text-sm font-medium text-gray-300">Device Motion</h4>
+                            
+                            {/* Acceleration */}
+                            <div className="space-y-1">
+                              <h5 className="text-xs text-gray-400">Acceleration (m/s²)</h5>
+                              <div className="grid grid-cols-3 gap-2 text-sm">
+                                <div>
+                                  <span className="text-gray-400">X:</span>
+                                  <span className="ml-2 text-white">{motion.acceleration.x?.toFixed(2) ?? 'N/A'}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">Y:</span>
+                                  <span className="ml-2 text-white">{motion.acceleration.y?.toFixed(2) ?? 'N/A'}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">Z:</span>
+                                  <span className="ml-2 text-white">{motion.acceleration.z?.toFixed(2) ?? 'N/A'}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Acceleration Including Gravity */}
+                            <div className="space-y-1">
+                              <h5 className="text-xs text-gray-400">Acceleration with Gravity (m/s²)</h5>
+                              <div className="grid grid-cols-3 gap-2 text-sm">
+                                <div>
+                                  <span className="text-gray-400">X:</span>
+                                  <span className="ml-2 text-white">{motion.accelerationIncludingGravity.x?.toFixed(2) ?? 'N/A'}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">Y:</span>
+                                  <span className="ml-2 text-white">{motion.accelerationIncludingGravity.y?.toFixed(2) ?? 'N/A'}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">Z:</span>
+                                  <span className="ml-2 text-white">{motion.accelerationIncludingGravity.z?.toFixed(2) ?? 'N/A'}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Rotation Rate */}
+                            <div className="space-y-1">
+                              <h5 className="text-xs text-gray-400">Rotation Rate (°/s)</h5>
+                              <div className="grid grid-cols-3 gap-2 text-sm">
+                                <div>
+                                  <span className="text-gray-400">α:</span>
+                                  <span className="ml-2 text-white">{motion.rotationRate.alpha?.toFixed(2) ?? 'N/A'}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">β:</span>
+                                  <span className="ml-2 text-white">{motion.rotationRate.beta?.toFixed(2) ?? 'N/A'}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">γ:</span>
+                                  <span className="ml-2 text-white">{motion.rotationRate.gamma?.toFixed(2) ?? 'N/A'}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="text-xs">
+                              <span className="text-gray-400">Update Interval:</span>
+                              <span className="ml-2 text-white">{motion.interval}ms</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Raw Events Debug */}
+                        <div className="space-y-2 border-t border-gray-600 mt-2 pt-2">
+                          <h4 className="text-sm font-medium text-gray-300">Raw Events</h4>
+                          
+                          {/* Orientation Event */}
+                          {rawEvents.orientation && (
+                            <div className="space-y-1">
+                              <h5 className="text-xs text-gray-400">Device Orientation Event</h5>
+                              <div className="text-xs space-y-1">
+                                <div>
+                                  <span className="text-gray-400">absolute:</span>
+                                  <span className="ml-2 text-white">{String(rawEvents.orientation.absolute)}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">alpha:</span>
+                                  <span className="ml-2 text-white">{rawEvents.orientation.alpha?.toFixed(2)}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">beta:</span>
+                                  <span className="ml-2 text-white">{rawEvents.orientation.beta?.toFixed(2)}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">gamma:</span>
+                                  <span className="ml-2 text-white">{rawEvents.orientation.gamma?.toFixed(2)}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">webkitCompassHeading:</span>
+                                  <span className="ml-2 text-white">
+                                    {(rawEvents.orientation as DeviceOrientationEventWithWebkit).webkitCompassHeading?.toFixed(2) ?? 'N/A'}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">webkitCompassAccuracy:</span>
+                                  <span className="ml-2 text-white">
+                                    {(rawEvents.orientation as DeviceOrientationEventWithWebkit).webkitCompassAccuracy ?? 'N/A'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Motion Event */}
+                          {rawEvents.motion && (
+                            <div className="space-y-1 mt-2">
+                              <h5 className="text-xs text-gray-400">Device Motion Event</h5>
+                              <div className="text-xs space-y-1">
+                                <div>
+                                  <span className="text-gray-400">interval:</span>
+                                  <span className="ml-2 text-white">{rawEvents.motion.interval}</span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">acceleration:</span>
+                                  <span className="ml-2 text-white">
+                                    x: {rawEvents.motion.acceleration?.x?.toFixed(2) ?? 'N/A'}, 
+                                    y: {rawEvents.motion.acceleration?.y?.toFixed(2) ?? 'N/A'}, 
+                                    z: {rawEvents.motion.acceleration?.z?.toFixed(2) ?? 'N/A'}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">accelerationIncludingGravity:</span>
+                                  <span className="ml-2 text-white">
+                                    x: {rawEvents.motion.accelerationIncludingGravity?.x?.toFixed(2) ?? 'N/A'}, 
+                                    y: {rawEvents.motion.accelerationIncludingGravity?.y?.toFixed(2) ?? 'N/A'}, 
+                                    z: {rawEvents.motion.accelerationIncludingGravity?.z?.toFixed(2) ?? 'N/A'}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-gray-400">rotationRate:</span>
+                                  <span className="ml-2 text-white">
+                                    α: {rawEvents.motion.rotationRate?.alpha?.toFixed(2) ?? 'N/A'}, 
+                                    β: {rawEvents.motion.rotationRate?.beta?.toFixed(2) ?? 'N/A'}, 
+                                    γ: {rawEvents.motion.rotationRate?.gamma?.toFixed(2) ?? 'N/A'}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Mouse/Gyro Position Debug */}
@@ -266,8 +454,8 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
                   Close
                 </button>
               </div>
-            </motion.div>
-          </motion.div>
+            </framerMotion.div>
+          </framerMotion.div>
         </>
       )}
     </AnimatePresence>
