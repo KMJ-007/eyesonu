@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSettings } from '@/contexts/SettingsContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useMousePosition } from '@/hooks/useMousePosition';
 
 interface InfoModalProps {
   isOpen: boolean;
@@ -10,6 +11,23 @@ interface InfoModalProps {
 export function InfoModal({ isOpen, onClose }: InfoModalProps) {
   const { settings, updateSettings } = useSettings();
   const [activeTab, setActiveTab] = useState<'info' | 'settings'>('info');
+  const mousePosition = useMousePosition();
+  const [calculations, setCalculations] = useState({ dx: 0, dy: 0, angle: 0, distance: 0 });
+
+  useEffect(() => {
+    // Calculate relative to center of viewport
+    const dx = mousePosition.x - window.innerWidth / 2;
+    const dy = mousePosition.y - window.innerHeight / 2;
+    const angle = Math.atan2(dy, dx);
+    const distance = Math.hypot(dx, dy);
+
+    setCalculations({
+      dx: Math.round(dx),
+      dy: Math.round(dy),
+      angle: Math.round((angle * 180) / Math.PI),
+      distance: Math.round(distance),
+    });
+  }, [mousePosition]);
 
   return (
     <AnimatePresence>
@@ -26,8 +44,9 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
-            className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md 
-                     max-h-[85vh] flex flex-col bg-[#1F2937] rounded-2xl shadow-2xl z-50 text-gray-100"
+            className="fixed left-1/2 top-[10vh] -translate-x-1/2 w-[90%] max-w-md 
+                     bg-[#1F2937] rounded-2xl shadow-2xl z-50 text-gray-100 overflow-hidden
+                     flex flex-col max-h-[80vh]"
           >
             {/* Tabs */}
             <div className="flex space-x-4 p-6 pb-2">
@@ -77,6 +96,29 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
                   <h2 className="text-2xl font-bold text-white">Settings</h2>
                   
                   <div className="space-y-6">
+                    {/* Eye tracking calculations */}
+                    <div className="bg-[#374151] p-4 rounded-lg space-y-2">
+                      <h3 className="text-sm font-medium text-gray-300">Eye Tracking Calculations</h3>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                          <span className="text-gray-400">dx:</span>
+                          <span className="ml-2 text-white">{calculations.dx}px</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">dy:</span>
+                          <span className="ml-2 text-white">{calculations.dy}px</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">angle:</span>
+                          <span className="ml-2 text-white">{calculations.angle}°</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">distance:</span>
+                          <span className="ml-2 text-white">{calculations.distance}px</span>
+                        </div>
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">
                         Eye Scale: {settings.eyeScale}%
@@ -137,7 +179,7 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
               )}
             </div>
 
-            <div className="p-6 pt-2">
+            <div className="p-6 pt-2 border-t border-gray-700">
               <button
                 type="button"
                 onClick={onClose}

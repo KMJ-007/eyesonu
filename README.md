@@ -1,3 +1,43 @@
+# Eyes on U
+
+A fun interactive web app where multiple eyes follow your cursor around the screen!
+
+## How It Works
+
+The eye-tracking effect works like a simplified version of real eye movement. Here's how:
+
+### 1. Finding the Center Point
+- Each eye has a center point (like the pivot of a real eye)
+- We calculate this by finding the middle of each eye element
+
+### 2. Mouse Position
+- We track where your mouse cursor is on the screen
+- We measure how far your mouse is from each eye's center (both horizontally and vertically)
+
+### 3. Movement Calculation (in simple terms)
+Imagine each eye's pupil is attached to the center with a rubber band:
+1. The pupil wants to look at your mouse cursor
+2. The rubber band limits how far it can stretch (this is our `radius` limit)
+3. The closer your mouse is to an eye, the less the pupil moves
+4. The further your mouse is, the more the pupil stretches (up to its limit)
+
+### 4. Technical:
+We use:
+- `dx` and `dy`: How far the mouse is from the eye (like "2 inches right, 3 inches up")
+- `angle`: The direction to look (calculated using `Math.atan2`)
+- `distance`: How far to move (using `Math.hypot` for distance calculation)
+- Convert back to x,y coordinates using `Math.cos` and `Math.sin`
+
+devnotes:
+
+this thing needs to be responsive
+
+domain: eyesonyou.fun
+
+
+don't forget to update the favicon icon
+
+
 ideas:
 
 - one different color eye when clicked on that it will open the modal explaining what is this, and why is this created(main philosophy)

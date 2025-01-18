@@ -18,18 +18,21 @@ export function Eye({ mouseX, mouseY }: EyeProps) {
     const eyeCenterX = rect.left + rect.width / 2;
     const eyeCenterY = rect.top + rect.height / 2;
 
-    const radian = Math.atan2(mouseY - eyeCenterY, mouseX - eyeCenterX);
-    const maxDistance = rect.width * 0.08;
+    // Calculate the angle and distance
+    const dx = mouseX - eyeCenterX;
+    const dy = mouseY - eyeCenterY;
+    const angle = Math.atan2(dy, dx);
 
-    const distance = Math.min(
-      Math.hypot(mouseX - eyeCenterX, mouseY - eyeCenterY) * 0.15,
-      maxDistance
-    );
+    // Limit the movement radius (increased slightly for more movement)
+    const maxRadius = rect.width * 0.2;
+    const distance = Math.min(Math.hypot(dx, dy) * 0.15, maxRadius);
 
-    const pupilX = Math.cos(radian) * distance;
-    const pupilY = Math.sin(radian) * distance;
+    // Calculate new position
+    const x = Math.cos(angle) * distance;
+    const y = Math.sin(angle) * distance;
 
-    pupil.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
+    // Apply the transform from the center
+    pupil.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
   }, [mouseX, mouseY]);
 
   return (
@@ -41,8 +44,7 @@ export function Eye({ mouseX, mouseY }: EyeProps) {
         >
           <div
             ref={pupilRef}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-                     w-[45%] h-[45%] rounded-full bg-[#4169e1]"
+            className="absolute top-1/2 left-1/2 w-[45%] h-[45%] rounded-full bg-[#4169e1]"
           >
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[45%] h-[45%] rounded-full bg-black" />
             <div className="absolute top-[15%] left-[15%] w-[25%] h-[25%] rounded-full bg-white/60" />
