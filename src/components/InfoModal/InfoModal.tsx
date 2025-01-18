@@ -38,157 +38,158 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-          />
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
-            className="fixed left-1/2 top-[10vh] -translate-x-1/2 w-[90%] max-w-md 
-                     bg-[#1F2937] rounded-2xl shadow-2xl z-50 text-gray-100 overflow-hidden
-                     flex flex-col max-h-[80vh]"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 flex items-center justify-center"
           >
-            {/* Tabs */}
-            <div className="flex space-x-4 p-6 pb-2">
-              <button
-                type="button"
-                onClick={() => setActiveTab('info')}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  activeTab === 'info'
-                    ? 'bg-[#374151] text-white'
-                    : 'text-gray-400 hover:bg-[#374151]/50'
-                }`}
-              >
-                Info
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('settings')}
-                className={`px-4 py-2 rounded-lg transition-colors ${
-                  activeTab === 'settings'
-                    ? 'bg-[#374151] text-white'
-                    : 'text-gray-400 hover:bg-[#374151]/50'
-                }`}
-              >
-                Settings
-              </button>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-[90%] max-w-md bg-[#1F2937] rounded-2xl shadow-2xl z-50 text-gray-100 
+                       overflow-hidden flex flex-col max-h-[80vh]"
+            >
+              {/* Tabs */}
+              <div className="flex space-x-4 p-6 pb-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('info')}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    activeTab === 'info'
+                      ? 'bg-[#374151] text-white'
+                      : 'text-gray-400 hover:bg-[#374151]/50'
+                  }`}
+                >
+                  Info
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('settings')}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    activeTab === 'settings'
+                      ? 'bg-[#374151] text-white'
+                      : 'text-gray-400 hover:bg-[#374151]/50'
+                  }`}
+                >
+                  Settings
+                </button>
+              </div>
 
-            <div className="flex-1 overflow-y-auto px-6 py-4">
-              {activeTab === 'info' ? (
-                <>
-                  <h2 className="text-2xl font-bold mb-4 text-white">Eyes On U 👀</h2>
-                  <p className="text-gray-300 mb-4">
-                    An interactive art piece where multiple eyes follow your cursor or touch movement.
-                    Each eye tracks independently, creating an immersive and slightly unsettling experience.
-                  </p>
-                  <div className="text-sm text-gray-400">
-                    <p>Built with:</p>
-                    <ul className="list-disc list-inside mt-2 space-y-1">
-                      <li>Next.js & React</li>
-                      <li>Framer Motion</li>
-                      <li>Tailwind CSS</li>
-                    </ul>
-                  </div>
-                </>
-              ) : (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-white">Settings</h2>
-                  
+              <div className="flex-1 overflow-y-auto px-6 py-4">
+                {activeTab === 'info' ? (
+                  <>
+                    <h2 className="text-2xl font-bold mb-4 text-white">Eyes On U 👀</h2>
+                    <p className="text-gray-300 mb-4">
+                      Ever felt like you&apos;re being watched? This piece explores that universal feeling we all know too well.
+                      Sometimes it&apos;s the weight of expectations, other times it&apos;s the comfort of being seen and acknowledged.
+                    </p>
+                    <p className="text-gray-300 mb-6">
+                      As you move through this space, hundreds of eyes follow your every move – just like the countless 
+                      invisible gazes we navigate daily. Some days we crave this attention, other days we wish we could 
+                      just... disappear.
+                    </p>
+                    <div className="text-sm text-gray-400">
+                      <p className="mb-2">Created by <a href="https://karanjanthe.me" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Karan Janthe</a></p>
+                    </div>
+                  </>
+                ) : (
                   <div className="space-y-6">
-                    {/* Eye tracking calculations */}
-                    <div className="bg-[#374151] p-4 rounded-lg space-y-2">
-                      <h3 className="text-sm font-medium text-gray-300">Eye Tracking Calculations</h3>
-                      <div className="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                          <span className="text-gray-400">dx:</span>
-                          <span className="ml-2 text-white">{calculations.dx}px</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-400">dy:</span>
-                          <span className="ml-2 text-white">{calculations.dy}px</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-400">angle:</span>
-                          <span className="ml-2 text-white">{calculations.angle}°</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-400">distance:</span>
-                          <span className="ml-2 text-white">{calculations.distance}px</span>
+                    <h2 className="text-2xl font-bold text-white">Settings</h2>
+                    
+                    <div className="space-y-6">
+                      {/* Eye tracking calculations */}
+                      <div className="bg-[#374151] p-4 rounded-lg space-y-2">
+                        <h3 className="text-sm font-medium text-gray-300">Eye Tracking Calculations</h3>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <span className="text-gray-400">dx:</span>
+                            <span className="ml-2 text-white">{calculations.dx}px</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400">dy:</span>
+                            <span className="ml-2 text-white">{calculations.dy}px</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400">angle:</span>
+                            <span className="ml-2 text-white">{calculations.angle}°</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-400">distance:</span>
+                            <span className="ml-2 text-white">{calculations.distance}px</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Eye Scale: {settings.eyeScale}%
-                      </label>
-                      <input
-                        type="range"
-                        min="50"
-                        max="100"
-                        value={settings.eyeScale}
-                        onChange={(e) => updateSettings({ eyeScale: parseInt(e.target.value) })}
-                        className="w-full accent-blue-500 bg-[#374151] h-2 rounded-lg appearance-none cursor-pointer"
-                      />
-                    </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Eye Scale: {settings.eyeScale}%
+                        </label>
+                        <input
+                          type="range"
+                          min="50"
+                          max="100"
+                          value={settings.eyeScale}
+                          onChange={(e) => updateSettings({ eyeScale: parseInt(e.target.value) })}
+                          className="w-full accent-blue-500 bg-[#374151] h-2 rounded-lg appearance-none cursor-pointer"
+                        />
+                      </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Movement Damping: {settings.damping}
-                      </label>
-                      <input
-                        type="range"
-                        min="5"
-                        max="30"
-                        value={settings.damping}
-                        onChange={(e) => updateSettings({ damping: parseInt(e.target.value) })}
-                        className="w-full accent-blue-500 bg-[#374151] h-2 rounded-lg appearance-none cursor-pointer"
-                      />
-                    </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Movement Damping: {settings.damping}
+                        </label>
+                        <input
+                          type="range"
+                          min="5"
+                          max="30"
+                          value={settings.damping}
+                          onChange={(e) => updateSettings({ damping: parseInt(e.target.value) })}
+                          className="w-full accent-blue-500 bg-[#374151] h-2 rounded-lg appearance-none cursor-pointer"
+                        />
+                      </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Movement Stiffness: {settings.stiffness}
-                      </label>
-                      <input
-                        type="range"
-                        min="50"
-                        max="300"
-                        value={settings.stiffness}
-                        onChange={(e) => updateSettings({ stiffness: parseInt(e.target.value) })}
-                        className="w-full accent-blue-500 bg-[#374151] h-2 rounded-lg appearance-none cursor-pointer"
-                      />
-                    </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Movement Stiffness: {settings.stiffness}
+                        </label>
+                        <input
+                          type="range"
+                          min="50"
+                          max="300"
+                          value={settings.stiffness}
+                          onChange={(e) => updateSettings({ stiffness: parseInt(e.target.value) })}
+                          className="w-full accent-blue-500 bg-[#374151] h-2 rounded-lg appearance-none cursor-pointer"
+                        />
+                      </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Max Movement Scale: {settings.maxMoveScale.toFixed(2)}
-                      </label>
-                      <input
-                        type="range"
-                        min="5"
-                        max="25"
-                        value={settings.maxMoveScale * 100}
-                        onChange={(e) => updateSettings({ maxMoveScale: parseInt(e.target.value) / 100 })}
-                        className="w-full accent-blue-500 bg-[#374151] h-2 rounded-lg appearance-none cursor-pointer"
-                      />
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Max Movement Scale: {settings.maxMoveScale.toFixed(2)}
+                        </label>
+                        <input
+                          type="range"
+                          min="5"
+                          max="25"
+                          value={settings.maxMoveScale * 100}
+                          onChange={(e) => updateSettings({ maxMoveScale: parseInt(e.target.value) / 100 })}
+                          className="w-full accent-blue-500 bg-[#374151] h-2 rounded-lg appearance-none cursor-pointer"
+                        />
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
 
-            <div className="p-6 pt-2 border-t border-gray-700">
-              <button
-                type="button"
-                onClick={onClose}
-                className="w-full px-4 py-2 bg-[#374151] text-white rounded-lg 
-                         hover:bg-[#4B5563] transition-colors"
-              >
-                Close
-              </button>
-            </div>
+              <div className="p-6 pt-2 border-t border-gray-700">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-full px-4 py-2 bg-[#374151] text-white rounded-lg 
+                           hover:bg-[#4B5563] transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         </>
       )}
