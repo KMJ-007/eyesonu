@@ -96,20 +96,11 @@ export function useDeviceOrientation(): UseDeviceOrientationData {
     const win = window as WindowWithOrientation;
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-    console.log('Device Sensors Debug:', {
-      isIOS,
-      orientationSupported: 'DeviceOrientationEvent' in win,
-      motionSupported: 'DeviceMotionEvent' in win,
-      hasOrientationPermissionAPI: typeof win.DeviceOrientationEvent?.requestPermission === 'function',
-      hasMotionPermissionAPI: typeof win.DeviceMotionEvent?.requestPermission === 'function'
-    });
-
+   
     try {
       // Only request permissions on iOS 13+
       if (isIOS && typeof win.DeviceOrientationEvent?.requestPermission === 'function') {
-        console.log('Requesting iOS orientation permission...');
         const orientationPermission = await win.DeviceOrientationEvent.requestPermission();
-        console.log('iOS orientation permission result:', orientationPermission);
         if (orientationPermission !== 'granted') {
           setError(new Error('Orientation permission not granted'));
           return false;
@@ -117,9 +108,7 @@ export function useDeviceOrientation(): UseDeviceOrientationData {
       }
 
       if (isIOS && typeof win.DeviceMotionEvent?.requestPermission === 'function') {
-        console.log('Requesting iOS motion permission...');
         const motionPermission = await win.DeviceMotionEvent.requestPermission();
-        console.log('iOS motion permission result:', motionPermission);
         if (motionPermission !== 'granted') {
           setError(new Error('Motion permission not granted'));
           return false;
