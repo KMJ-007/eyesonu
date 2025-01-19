@@ -53,7 +53,11 @@ export default function Home() {
     }
 
     if (isWebcamEnabled && webcamPosition) {
-      return webcamPosition;
+      // Invert coordinates for webcam to create opposite direction effect
+      return {
+        x: windowSize.width - webcamPosition.x,
+        y: windowSize.height - webcamPosition.y
+      };
     }
     if (isGyroAvailable && orientation) {
       // Convert orientation to screen coordinates with clamping
