@@ -5,8 +5,9 @@ import { InfoModal } from '@/components/InfoModal/InfoModal';
 import { useMousePosition } from '@/hooks/useMousePosition';
 import { useWindowSize } from '@/hooks/useWindowSize';
 import { getGridConfig } from '@/utils/gridConfig';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useDeviceOrientation } from '@/hooks/useDeviceOrientation';
+import { useWebcamTracking } from '@/hooks/useWebcamTracking';
 
 const INITIAL_EYES = 500;
 const EYES_INCREMENT = 200;
@@ -18,12 +19,50 @@ export default function Home() {
   const windowSize = useWindowSize();
   const containerRef = useRef<HTMLDivElement>(null);
   const [totalEyes, setTotalEyes] = useState(INITIAL_EYES);
-  const { orientation } = useDeviceOrientation();
+  const { orientation, requestAccess: requestGyroAccess } = useDeviceOrientation();
   const [isGyroAvailable, setIsGyroAvailable] = useState(false);
+  const { position: webcamPosition, isEnabled: isWebcamEnabled, initializeWebcam } = useWebcamTracking();
+  const hasInitializedRef = useRef(false);
+
+  // Auto-initialize webcam only once on mount
+  useEffect(() => {
+    if (!hasInitializedRef.current) {
+      hasInitializedRef.current = true;
+      // Small delay to avoid immediate permission popup
+      const timer = setTimeout(() => {
+        initializeWebcam();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [initializeWebcam]);
 
   useEffect(() => {
-    setIsGyroAvailable('ontouchstart' in window);
-  }, []);
+    const isTouchDevice = 'ontouchstart' in window;
+    setIsGyroAvailable(isTouchDevice);
+    
+    // Auto-request gyro access on touch devices
+    if (isTouchDevice && !orientation) {
+      requestGyroAccess();
+    }
+  }, [orientation, requestGyroAccess]);
+
+  // Determine tracking position based on priority
+  const trackingPosition = useMemo(() => {
+    if (!windowSize.width || !windowSize.height) {
+      return mousePosition;
+    }
+
+    if (isWebcamEnabled && webcamPosition) {
+      return webcamPosition;
+    }
+    if (isGyroAvailable && orientation) {
+      // Convert orientation to screen coordinates with clamping
+      const x = Math.min(Math.max((orientation.gamma || 0) / 90 * windowSize.width + windowSize.width / 2, 0), windowSize.width);
+      const y = Math.min(Math.max((orientation.beta || 0) / 90 * windowSize.height + windowSize.height / 2, 0), windowSize.height);
+      return { x, y };
+    }
+    return mousePosition;
+  }, [isWebcamEnabled, webcamPosition, isGyroAvailable, orientation, mousePosition, windowSize]);
 
   const handleScroll = useCallback(() => {
     const container = containerRef.current;
@@ -79,22 +118,48 @@ export default function Home() {
           return (
             <Eye 
               key={eyeId}
-              mouseX={mousePosition.x} 
-              mouseY={mousePosition.y}
+              mouseX={trackingPosition.x} 
+              mouseY={trackingPosition.y}
             />
           );
         })}
       </div>
 
       <div className="fixed left-4 bottom-4 flex gap-2 z-30">
+        {/* Webcam button */}
+        <button
+          type="button"
+          className={`w-8 h-8 rounded-full shadow-lg overflow-hidden
+                   border-2 border-white/90 hover:scale-110 transition-transform
+                   flex items-center justify-center ${isWebcamEnabled ? 'bg-green-500 text-white' : 'bg-white text-gray-700'}`}
+          onClick={() => {
+            if (hasInitializedRef.current) {
+              initializeWebcam();
+            }
+          }}
+          title={isWebcamEnabled ? 'Click to disable webcam tracking (Priority 1)' : 'Enable webcam tracking (Priority 1)'}
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            viewBox="0 0 24 24" 
+            fill="currentColor" 
+            className="w-5 h-5"
+            aria-label="Webcam icon"
+            role="img"
+          >
+            <path d="M4.5 4.5a3 3 0 00-3 3v9a3 3 0 003 3h8.25a3 3 0 003-3v-9a3 3 0 00-3-3H4.5zM19.94 18.75l-2.69-2.69V7.94l2.69-2.69c.944-.945 2.56-.276 2.56 1.06v11.38c0 1.336-1.616 2.005-2.56 1.06z" />
+          </svg>
+        </button>
+
+        {/* Gyroscope button */}
         {isGyroAvailable && (
           <button
             type="button"
             className={`w-8 h-8 rounded-full shadow-lg overflow-hidden
                      border-2 border-white/90 hover:scale-110 transition-transform
-                     flex items-center justify-center ${orientation ? 'bg-green-500' : 'bg-white'}`}
-            onClick={() => window.location.reload()}
-            title={orientation ? 'Gyroscope active' : 'Click to enable gyroscope'}
+                     flex items-center justify-center ${orientation ? 'bg-green-500 text-white' : 'bg-white text-gray-700'}`}
+            onClick={requestGyroAccess}
+            title={orientation ? 'Gyroscope active (Priority 2)' : 'Click to enable gyroscope (Priority 2)'}
           >
             <svg 
               xmlns="http://www.w3.org/2000/svg" 

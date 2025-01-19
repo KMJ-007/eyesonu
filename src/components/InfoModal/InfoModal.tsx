@@ -3,6 +3,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { useState, useEffect } from 'react';
 import { useMousePosition } from '@/hooks/useMousePosition';
 import { useDeviceOrientation } from '@/hooks/useDeviceOrientation';
+import { useWebcamTracking } from '@/hooks/useWebcamTracking';
 
 interface WindowWithOrientation extends Window {
   DeviceOrientationEvent?: {
@@ -34,6 +35,7 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
     orientation: DeviceOrientationEvent | null;
     motion: DeviceMotionEvent | null;
   }>({ orientation: null, motion: null });
+  const { position: webcamPosition, isEnabled: isWebcamEnabled, hasPermission } = useWebcamTracking();
 
   useEffect(() => {
     const handleOrientation = (e: DeviceOrientationEvent) => {
@@ -134,6 +136,43 @@ export function InfoModal({ isOpen, onClose }: InfoModalProps) {
                     <h2 className="text-2xl font-bold text-white">Settings</h2>
                     
                     <div className="space-y-6">
+                      {/* Webcam Status */}
+                      <div className="bg-[#374151] p-4 rounded-lg space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-sm font-medium text-gray-300">Webcam Tracking</h3>
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            isWebcamEnabled 
+                              ? 'bg-green-500/20 text-green-400'
+                              : hasPermission === false
+                              ? 'bg-red-500/20 text-red-400'
+                              : 'bg-yellow-500/20 text-yellow-400'
+                          }`}>
+                            {isWebcamEnabled 
+                              ? 'Active' 
+                              : hasPermission === false
+                              ? 'Permission Denied'
+                              : 'Inactive'}
+                          </span>
+                        </div>
+                        {hasPermission === false && (
+                          <p className="text-xs text-red-400 mt-2">
+                            Please allow camera access in your browser settings to use webcam tracking.
+                          </p>
+                        )}
+                        {isWebcamEnabled && (
+                          <div className="text-xs text-gray-400 space-y-1 border-t border-gray-600 mt-2 pt-2">
+                            <div>
+                              <span>Position X: </span>
+                              <span className="text-white">{Math.round(webcamPosition.x)}px</span>
+                            </div>
+                            <div>
+                              <span>Position Y: </span>
+                              <span className="text-white">{Math.round(webcamPosition.y)}px</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
                       {/* Gyroscope Status */}
                       <div className="bg-[#374151] p-4 rounded-lg space-y-2">
                         <div className="flex items-center justify-between">
